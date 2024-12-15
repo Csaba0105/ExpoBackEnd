@@ -4,6 +4,7 @@ import com.example.springboot3jwtauthentication.dto.PostDTO;
 import com.example.springboot3jwtauthentication.dto.UserDTO;
 import com.example.springboot3jwtauthentication.models.Image;
 import com.example.springboot3jwtauthentication.models.Post;
+import com.example.springboot3jwtauthentication.services.PostLikeService;
 import com.example.springboot3jwtauthentication.services.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 public class PostController {
 
   private final PostService postService;
+  private final PostLikeService postLikeService;
 
 
   @GetMapping
@@ -64,6 +66,20 @@ public class PostController {
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+  }
+
+  // Like hozzáadása vagy eltávolítása
+  @PostMapping("/{postId}/like")
+  public ResponseEntity<?> toggleLike(@PathVariable Long postId, @RequestParam Long userId) {
+    String message = postLikeService.toggleLike(postId, userId);
+    return ResponseEntity.ok().body(message);
+  }
+
+  // Like-ok számának lekérdezése
+  @GetMapping("/{postId}/likes/count")
+  public ResponseEntity<?> getLikeCount(@PathVariable Long postId) {
+    Long likeCount = postLikeService.getLikeCount(postId);
+    return ResponseEntity.ok().body(likeCount);
   }
 
   @GetMapping("/anon")
