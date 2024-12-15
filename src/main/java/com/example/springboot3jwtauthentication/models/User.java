@@ -51,6 +51,8 @@ public class User implements UserDetails {
 
   LocalDateTime updatedAt;
 
+  String imageUrl;
+
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
       return List.of(new SimpleGrantedAuthority(role.name()));

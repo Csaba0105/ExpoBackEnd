@@ -1,5 +1,7 @@
 package com.example.springboot3jwtauthentication.controllers;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +14,8 @@ import com.example.springboot3jwtauthentication.services.AuthenticationService;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -20,7 +24,7 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/signup")
-    public JwtAuthenticationResponse signup(@RequestBody SignUpRequest request) {
+    public ResponseEntity<?> signup(@RequestBody SignUpRequest request) {
         return authenticationService.signup(request);
     }
 

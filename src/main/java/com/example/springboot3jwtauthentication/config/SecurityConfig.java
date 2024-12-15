@@ -19,6 +19,9 @@ import com.example.springboot3jwtauthentication.filters.JwtAuthenticationFilter;
 import com.example.springboot3jwtauthentication.services.UserService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -42,23 +45,38 @@ public class SecurityConfig {
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
       return config.getAuthenticationManager();
   }
-  
-  @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-    .csrf(csrf -> csrf 
-      .disable()
-    )
-    .sessionManagement(session -> session
-      .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-    )
-    .authorizeHttpRequests(authorize -> authorize
-      .requestMatchers(HttpMethod.POST, "/api/v1/signup", "/api/v1/signin").permitAll()
-      .requestMatchers(HttpMethod.GET, "/api/v1/test/**").permitAll()
-      .anyRequest().authenticated()
-    )
-    .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-    return http.build();
-  }
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(cors -> cors
+                        .configurationSource(corsConfigurationSource()) // Hozzáadva a CORS konfiguráció
+                )
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.POST, "/api/v1/signup", "/api/v1/signin").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/test/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("http://localhost:8081"); // Expo fejlesztői URL
+        configuration.addAllowedMethod("*"); // Engedélyezett HTTP metódusok
+        configuration.addAllowedHeader("*"); // Engedélyezett HTTP fejlécek
+        configuration.setAllowCredentials(true); // Sütik és hitelesítési adatok engedélyezése
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }
