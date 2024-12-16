@@ -23,6 +23,10 @@ public class PostLikeService {
     @Autowired
     private UserRepository userRepository;
 
+    public boolean isPostLikedByUser(Long postId, Long userId) {
+        return postLikeRepository.existsByPostIdAndUserId(postId, userId);
+    }
+
     // Like hozzáadása vagy eltávolítása
     public String toggleLike(Long postId, Long userId) {
         Optional<PostLike> existingLike = postLikeRepository.findByPostIdAndUserId(postId, userId);
@@ -47,6 +51,16 @@ public class PostLikeService {
     // Like-ok számlálása
     public Long getLikeCount(Long postId) {
         return postLikeRepository.countByPostId(postId);
+    }
+
+    /**
+     * Ellenőrzi, hogy egy adott felhasználó lájkolta-e az adott posztot.
+     * @param postId a poszt azonosítója
+     * @param userId a felhasználó azonosítója
+     * @return true, ha a felhasználó lájkolta a posztot, különben false
+     */
+    public boolean hasUserLiked(Long postId, Long userId) {
+        return postLikeRepository.existsByPostIdAndUserId(postId, userId);
     }
 }
 

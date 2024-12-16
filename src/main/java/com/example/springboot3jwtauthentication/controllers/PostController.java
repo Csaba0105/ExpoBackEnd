@@ -6,13 +6,16 @@ import com.example.springboot3jwtauthentication.models.Image;
 import com.example.springboot3jwtauthentication.models.Post;
 import com.example.springboot3jwtauthentication.services.PostLikeService;
 import com.example.springboot3jwtauthentication.services.PostService;
+import com.example.springboot3jwtauthentication.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -21,11 +24,13 @@ import java.util.stream.Collectors;
 public class PostController {
 
   private final PostService postService;
+  private final UserService userService;
   private final PostLikeService postLikeService;
 
 
   @GetMapping
-  public List<PostDTO> getAllPosts() {
+  public List<PostDTO> getAllPosts(@RequestHeader("Authorization") String authToken) {
+    UserDTO user = userService.getUserProfile(authToken);
     List<Post> posts = postService.getAllPosts();
     return posts.stream()
             .map(post -> new PostDTO(
@@ -41,7 +46,8 @@ public class PostController {
                             post.getUser().getLastName(),
                             post.getUser().getEmail(),
                             post.getUser().getImageUrl()
-                    )
+                    ),
+                    postLikeService.isPostLikedByUser(post.getId(), user.getId())
             ))
             .collect(Collectors.toList());
   }
@@ -72,15 +78,19 @@ public class PostController {
   @PostMapping("/{postId}/like")
   public ResponseEntity<?> toggleLike(@PathVariable Long postId, @RequestParam Long userId) {
     String message = postLikeService.toggleLike(postId, userId);
-    System.out.println(message);
     return ResponseEntity.ok().body(message);
   }
 
-  // Like-ok számának lekérdezése
-  @GetMapping("/{postId}/likes/count")
-  public ResponseEntity<?> getLikeCount(@PathVariable Long postId) {
+  @GetMapping("/{postId}/likes/status")
+  public ResponseEntity<Map<String, Object>> getLikeStatus(@PathVariable Long postId, @RequestParam Long userId) {
+    boolean liked = postLikeService.hasUserLiked(postId, userId);
     Long likeCount = postLikeService.getLikeCount(postId);
-    return ResponseEntity.ok().body(likeCount);
+
+    Map<String, Object> response = new HashMap<>();
+    response.put("liked", liked);
+    response.put("likeCount", likeCount);
+
+    return ResponseEntity.ok(response);
   }
 
   @GetMapping("/anon")
