@@ -1,5 +1,6 @@
 package com.example.springboot3jwtauthentication.controllers;
 
+import com.example.springboot3jwtauthentication.dto.PostCommentDTO;
 import com.example.springboot3jwtauthentication.dto.PostDTO;
 import com.example.springboot3jwtauthentication.dto.UserDTO;
 import com.example.springboot3jwtauthentication.models.Image;
@@ -8,6 +9,7 @@ import com.example.springboot3jwtauthentication.services.PostLikeService;
 import com.example.springboot3jwtauthentication.services.PostService;
 import com.example.springboot3jwtauthentication.services.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/post")
@@ -30,67 +33,126 @@ public class PostController {
 
   @GetMapping
   public List<PostDTO> getAllPosts(@RequestHeader("Authorization") String authToken) {
-    UserDTO user = userService.getUserProfile(authToken);
-    List<Post> posts = postService.getAllPosts();
-    return posts.stream()
-            .map(post -> new PostDTO(
-                    post.getId(),
-                    post.getTitle(),
-                    post.getContent(),
-                    post.getImages().stream()
-                            .map(Image::getUrl)
-                            .toList(),
-                    new UserDTO(
-                            post.getUser().getId(),
-                            post.getUser().getFirstName(),
-                            post.getUser().getLastName(),
-                            post.getUser().getEmail(),
-                            post.getUser().getImageUrl()
-                    ),
-                    postLikeService.isPostLikedByUser(post.getId(), user.getId())
-            ))
-            .collect(Collectors.toList());
+    log.debug("Fetching all posts for user with token: {}", authToken);
+
+    try {
+      UserDTO user = userService.getUserProfile(authToken);
+      log.info("User profile retrieved successfully: {}", user.getId());
+
+      List<Post> posts = postService.getAllPosts();
+      log.info("Retrieved {} posts from the database", posts.size());
+
+      List<PostDTO> postDTOs = posts.stream()
+              .map(post -> new PostDTO(
+                      post.getId(),
+                      post.getTitle(),
+                      post.getContent(),
+                      post.getImages().stream()
+                              .map(Image::getUrl)
+                              .toList(),
+                      new UserDTO(
+                              post.getUser().getId(),
+                              post.getUser().getFirstName(),
+                              post.getUser().getLastName(),
+                              post.getUser().getEmail(),
+                              post.getUser().getImageUrl()
+                      ),
+                      postLikeService.isPostLikedByUser(post.getId(), user.getId())
+              ))
+              .collect(Collectors.toList());
+
+      log.info("Successfully transformed posts to DTOs for user {}", user.getId());
+      return postDTOs;
+
+    } catch (Exception e) {
+      log.error("Error occurred while fetching posts: {}", e.getMessage(), e);
+      throw e; // Vagy kezelheted megfelelő válasz státusszal
+    }
   }
 
-
-
   @GetMapping("/{id}")
-  public ResponseEntity<Post> getPostById(@PathVariable String id) {
-    System.out.println(id);
+  public ResponseEntity<Post> getPostById(@PathVariable Long id) {
+    log.info("Fetching post with id: {}", id);
+    postService.getPostById(id);
     return null;
   }
 
-  @PostMapping()
+  @PostMapping
   public ResponseEntity<Post> addPost(@RequestBody PostDTO postDTO) {
+    log.info("Attempting to add a new post with title: {}", postDTO.getTitle());
+
     try {
       Post post = new Post();
       post.setTitle(postDTO.getTitle());
       post.setContent(postDTO.getContent());
 
       Post savedPost = postService.savePost(post);
+      log.info("Successfully created a new post with ID: {} and title: {}", savedPost.getId(), savedPost.getTitle());
+
       return ResponseEntity.status(HttpStatus.CREATED).body(savedPost);
     } catch (Exception e) {
+      log.error("Error occurred while adding a new post with title: {}: {}", postDTO.getTitle(), e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
 
+
   // Like hozzáadása vagy eltávolítása
   @PostMapping("/{postId}/like")
   public ResponseEntity<?> toggleLike(@PathVariable Long postId, @RequestParam Long userId) {
-    String message = postLikeService.toggleLike(postId, userId);
-    return ResponseEntity.ok().body(message);
+    log.info("User with ID {} is toggling like for Post with ID {}", userId, postId);
+    try {
+      String message = postLikeService.toggleLike(postId, userId);
+      log.debug("Successfully toggled like: {}", message);
+      return ResponseEntity.ok().body(message);
+    } catch (Exception e) {
+      log.error("Error occurred while toggling like for Post ID {} by User ID {}: {}", postId, userId, e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+    }
   }
 
   @GetMapping("/{postId}/likes/status")
   public ResponseEntity<Map<String, Object>> getLikeStatus(@PathVariable Long postId, @RequestParam Long userId) {
-    boolean liked = postLikeService.hasUserLiked(postId, userId);
-    Long likeCount = postLikeService.getLikeCount(postId);
+    log.info("Fetching like status for Post ID {} and User ID {}", postId, userId);
 
-    Map<String, Object> response = new HashMap<>();
-    response.put("liked", liked);
-    response.put("likeCount", likeCount);
+    try {
+      boolean liked = postLikeService.hasUserLiked(postId, userId);
+      Long likeCount = postLikeService.getLikeCount(postId);
+      log.debug("Like status for Post ID {} and User ID {}: liked={}, likeCount={}", postId, userId, liked, likeCount);
+      Map<String, Object> response = new HashMap<>();
+      response.put("liked", liked);
+      response.put("likeCount", likeCount);
 
-    return ResponseEntity.ok(response);
+      return ResponseEntity.ok(response);
+    } catch (Exception e) {
+      log.error("Error fetching like status for Post ID {} and User ID {}: {}", postId, userId, e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    }
+  }
+
+
+  @GetMapping("/{postId}/comments")
+  public ResponseEntity<PostCommentDTO> getCommentsByPostId() {
+    return null;
+  }
+
+  @PostMapping("/{postId}/comments")
+  public ResponseEntity<PostCommentDTO> addCommentByPostId() {
+    return null;
+  }
+  @GetMapping("/{postId}/comments/{id}")
+  public ResponseEntity<PostCommentDTO> getCommentsById() {
+    return null;
+  }
+
+  @PutMapping("/{postId}/comments/{id}")
+  public ResponseEntity<PostCommentDTO> editCommentById() {
+    return null;
+  }
+
+  @DeleteMapping("/{postId}/comments/{id}")
+  public ResponseEntity<PostCommentDTO> deleteCommentById() {
+    return null;
   }
 
   @GetMapping("/anon")
