@@ -13,6 +13,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class UserDTO implements Serializable {
     private Long id;
+    private String userSortName;
     private String firstName;
     private String lastName;
     private String email;

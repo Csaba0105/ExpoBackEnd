@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SignUpRequest {
+  String userSortName;
   String firstName;
   String lastName;
   String email;

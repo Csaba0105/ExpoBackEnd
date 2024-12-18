@@ -34,6 +34,8 @@ public class User implements UserDetails {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long id;
+
+  String userSortName;
   
   String firstName;
 

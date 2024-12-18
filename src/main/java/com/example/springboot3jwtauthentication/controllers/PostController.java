@@ -5,6 +5,7 @@ import com.example.springboot3jwtauthentication.dto.PostDTO;
 import com.example.springboot3jwtauthentication.dto.UserDTO;
 import com.example.springboot3jwtauthentication.models.Image;
 import com.example.springboot3jwtauthentication.models.Post;
+import com.example.springboot3jwtauthentication.services.CommentService;
 import com.example.springboot3jwtauthentication.services.PostLikeService;
 import com.example.springboot3jwtauthentication.services.PostService;
 import com.example.springboot3jwtauthentication.services.UserService;
@@ -29,7 +30,7 @@ public class PostController {
   private final PostService postService;
   private final UserService userService;
   private final PostLikeService postLikeService;
-
+  private final CommentService commentService;
 
   @GetMapping
   public List<PostDTO> getAllPosts(@RequestHeader("Authorization") String authToken) {
@@ -52,6 +53,7 @@ public class PostController {
                               .toList(),
                       new UserDTO(
                               post.getUser().getId(),
+                              post.getUser().getUserSortName(),
                               post.getUser().getFirstName(),
                               post.getUser().getLastName(),
                               post.getUser().getEmail(),
@@ -132,27 +134,85 @@ public class PostController {
 
 
   @GetMapping("/{postId}/comments")
-  public ResponseEntity<PostCommentDTO> getCommentsByPostId() {
-    return null;
+  public ResponseEntity<List<PostCommentDTO>> getCommentsByPostId(@PathVariable Long postId) {
+    log.info("Fetching comments for Post ID {}", postId);
+    try {
+      List<PostCommentDTO> comments = commentService.getCommentsByPostId(postId);
+      log.debug("Retrieved {} comments for Post ID {}", comments.size(), postId);
+      return ResponseEntity.ok(comments);
+    } catch (Exception e) {
+      log.error("Error fetching comments for Post ID {}: {}", postId, e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    }
   }
 
+  @GetMapping("/{postId}/comments/count")
+  public ResponseEntity<Map<String, Object>> getCommentCount(@PathVariable Long postId) {
+    try {
+      Long commentCount = commentService.getCommentCount(postId);
+      Map<String, Object> response = new HashMap<>();
+      response.put("commentCount", commentCount);
+
+      return ResponseEntity.ok(response);
+    } catch (Exception e) {
+      log.error("Error fetching comment count for Post ID {} : {}", postId, e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    }
+
+  }
+
+  // 2. Új komment hozzáadása egy adott posthoz
   @PostMapping("/{postId}/comments")
-  public ResponseEntity<PostCommentDTO> addCommentByPostId() {
-    return null;
+  public ResponseEntity<PostCommentDTO> addCommentByPostId(@PathVariable Long postId, @RequestBody PostCommentDTO commentDTO) {
+    log.info("Adding new comment to Post ID {}", postId);
+    try {
+      PostCommentDTO savedComment = commentService.addCommentToPost(postId, commentDTO);
+      log.info("Successfully added comment with ID {} to Post ID {}", savedComment.getId(), postId);
+      return ResponseEntity.status(HttpStatus.CREATED).body(savedComment);
+    } catch (Exception e) {
+      log.error("Error adding comment to Post ID {}: {}", postId, e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
+
+  // 3. Komment lekérdezése ID alapján
   @GetMapping("/{postId}/comments/{id}")
-  public ResponseEntity<PostCommentDTO> getCommentsById() {
-    return null;
+  public ResponseEntity<PostCommentDTO> getCommentById(@PathVariable Long postId, @PathVariable Long id) {
+    log.info("Fetching comment with ID {} for Post ID {}", id, postId);
+    try {
+      PostCommentDTO comment = commentService.getCommentById(postId, id);
+      return ResponseEntity.ok(comment);
+    } catch (Exception e) {
+      log.error("Error fetching comment ID {} for Post ID {}: {}", id, postId, e.getMessage());
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
   }
 
+  // 4. Komment szerkesztése ID alapján
   @PutMapping("/{postId}/comments/{id}")
-  public ResponseEntity<PostCommentDTO> editCommentById() {
-    return null;
+  public ResponseEntity<PostCommentDTO> editCommentById(@PathVariable Long postId, @PathVariable Long id, @RequestBody PostCommentDTO updatedComment) {
+    log.info("Editing comment with ID {} for Post ID {}", id, postId);
+    try {
+      PostCommentDTO editedComment = commentService.editComment(postId, id, updatedComment);
+      return ResponseEntity.ok(editedComment);
+    } catch (Exception e) {
+      log.error("Error editing comment ID {} for Post ID {}: {}", id, postId, e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
+  // 5. Komment törlése ID alapján
   @DeleteMapping("/{postId}/comments/{id}")
-  public ResponseEntity<PostCommentDTO> deleteCommentById() {
-    return null;
+  public ResponseEntity<?> deleteCommentById(@PathVariable Long postId, @PathVariable Long id) {
+    log.info("Deleting comment with ID {} for Post ID {}", id, postId);
+    try {
+      commentService.deleteComment(postId, id);
+      log.info("Successfully deleted comment ID {} for Post ID {}", id, postId);
+      return ResponseEntity.noContent().build();
+    } catch (Exception e) {
+      log.error("Error deleting comment ID {} for Post ID {}: {}", id, postId, e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unable to delete comment");
+    }
   }
 
   @GetMapping("/anon")

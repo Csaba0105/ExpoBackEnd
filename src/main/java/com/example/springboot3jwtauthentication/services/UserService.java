@@ -40,7 +40,7 @@ public class UserService {
         String userEmail = extractUserIdFromToken(token);
         Optional<User> user = userRepository.findByEmail(userEmail);
         if (user.isPresent()) {
-            return new UserDTO(user.get().getId(), user.get().getFirstName(), user.get().getLastName(), user.get().getEmail(), user.get().getImageUrl());
+            return new UserDTO(user.get().getId(), user.get().getUserSortName(), user.get().getFirstName(), user.get().getLastName(), user.get().getEmail(), user.get().getImageUrl());
         } else {
             throw new RuntimeException("User not found");
         }
