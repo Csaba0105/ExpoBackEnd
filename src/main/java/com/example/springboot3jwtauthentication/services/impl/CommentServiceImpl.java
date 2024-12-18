@@ -3,8 +3,10 @@ package com.example.springboot3jwtauthentication.services.impl;
 import com.example.springboot3jwtauthentication.dto.PostCommentDTO;
 import com.example.springboot3jwtauthentication.models.Comment;
 import com.example.springboot3jwtauthentication.models.Post;
+import com.example.springboot3jwtauthentication.models.User;
 import com.example.springboot3jwtauthentication.repositories.CommentRepository;
 import com.example.springboot3jwtauthentication.repositories.PostRepository;
+import com.example.springboot3jwtauthentication.repositories.UserRepository;
 import com.example.springboot3jwtauthentication.services.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
     @Override
     public List<PostCommentDTO> getCommentsByPostId(Long postId) {
@@ -29,7 +32,7 @@ public class CommentServiceImpl implements CommentService {
                         comment.getUser().getUserSortName(),
                         comment.getUser().getImageUrl(),
                         comment.getText(),
-                        comment.getCreatedAt().toString()))
+                        comment.getCreatedAt()))
                 .collect(Collectors.toList());
     }
 
@@ -39,23 +42,29 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public PostCommentDTO addCommentToPost(Long postId, PostCommentDTO commentDTO) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
-        Comment comment = new Comment();
-        comment.setText(commentDTO.getText());
-        comment.setPost(post);
-        // Feltételezhető, hogy van egy bejelentkezett user (példa)
-        comment.setUser(post.getUser());
-        comment.setCreatedAt(LocalDateTime.now());
-        commentRepository.save(comment);
+    public Comment addComment(Long postId, Long userId, String text) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        return new PostCommentDTO(comment.getId(), comment.getUser().getUsername(), comment.getUser().getImageUrl(), comment.getText(), comment.getCreatedAt().toString());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Comment létrehozása
+        Comment comment = new Comment();
+        comment.setPost(post);
+        comment.setUser(user);
+        comment.setText(text);
+        comment.setCreatedAt(LocalDateTime.now());
+
+        // Mentés
+        return commentRepository.save(comment); // Visszatérés a létrehozott kommenttel
     }
+
 
     @Override
     public PostCommentDTO getCommentById(Long postId, Long id) {
         Comment comment = commentRepository.findByPostIdAndId(postId, id).orElseThrow(() -> new RuntimeException("Comment not found"));
-        return new PostCommentDTO(comment.getId(), comment.getUser().getUsername(), comment.getUser().getImageUrl(), comment.getText(), comment.getCreatedAt().toString());
+        return new PostCommentDTO(comment.getId(), comment.getUser().getUsername(), comment.getUser().getImageUrl(), comment.getText(), comment.getCreatedAt());
     }
 
     @Override
@@ -63,7 +72,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findByPostIdAndId(postId, id).orElseThrow(() -> new RuntimeException("Comment not found"));
         comment.setText(updatedComment.getText());
         commentRepository.save(comment);
-        return new PostCommentDTO(comment.getId(), comment.getUser().getUsername(), comment.getUser().getImageUrl(), comment.getText(), comment.getCreatedAt().toString());
+        return new PostCommentDTO(comment.getId(), comment.getUser().getUsername(), comment.getUser().getImageUrl(), comment.getText(), comment.getCreatedAt());
     }
 
     @Override

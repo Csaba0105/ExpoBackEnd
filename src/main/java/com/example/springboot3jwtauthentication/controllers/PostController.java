@@ -1,8 +1,10 @@
 package com.example.springboot3jwtauthentication.controllers;
 
+import com.example.springboot3jwtauthentication.dto.AddPostCommentDTO;
 import com.example.springboot3jwtauthentication.dto.PostCommentDTO;
 import com.example.springboot3jwtauthentication.dto.PostDTO;
 import com.example.springboot3jwtauthentication.dto.UserDTO;
+import com.example.springboot3jwtauthentication.models.Comment;
 import com.example.springboot3jwtauthentication.models.Image;
 import com.example.springboot3jwtauthentication.models.Post;
 import com.example.springboot3jwtauthentication.services.CommentService;
@@ -163,17 +165,24 @@ public class PostController {
 
   // 2. Új komment hozzáadása egy adott posthoz
   @PostMapping("/{postId}/comments")
-  public ResponseEntity<PostCommentDTO> addCommentByPostId(@PathVariable Long postId, @RequestBody PostCommentDTO commentDTO) {
-    log.info("Adding new comment to Post ID {}", postId);
-    try {
-      PostCommentDTO savedComment = commentService.addCommentToPost(postId, commentDTO);
-      log.info("Successfully added comment with ID {} to Post ID {}", savedComment.getId(), postId);
-      return ResponseEntity.status(HttpStatus.CREATED).body(savedComment);
-    } catch (Exception e) {
-      log.error("Error adding comment to Post ID {}: {}", postId, e.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
+  public ResponseEntity<PostCommentDTO> addComment(
+          @PathVariable Long postId,
+          @RequestBody AddPostCommentDTO request) {
+
+    Comment createdComment = commentService.addComment(postId, request.getUserId(), request.getText());
+
+    PostCommentDTO response = new PostCommentDTO(
+            createdComment.getId(),
+            createdComment.getUser().getUserSortName(),
+            createdComment.getUser().getImageUrl(),
+            createdComment.getText(),
+            createdComment.getCreatedAt()
+
+    );
+
+    return ResponseEntity.ok(response);
   }
+
 
   // 3. Komment lekérdezése ID alapján
   @GetMapping("/{postId}/comments/{id}")
