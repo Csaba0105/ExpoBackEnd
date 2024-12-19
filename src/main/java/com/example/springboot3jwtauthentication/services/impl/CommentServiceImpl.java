@@ -29,6 +29,7 @@ public class CommentServiceImpl implements CommentService {
                 .stream()
                 .map(comment -> new PostCommentDTO(
                         comment.getId(),
+                        comment.getUser().getId(),
                         comment.getUser().getUserSortName(),
                         comment.getUser().getImageUrl(),
                         comment.getText(),
@@ -64,7 +65,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public PostCommentDTO getCommentById(Long postId, Long id) {
         Comment comment = commentRepository.findByPostIdAndId(postId, id).orElseThrow(() -> new RuntimeException("Comment not found"));
-        return new PostCommentDTO(comment.getId(), comment.getUser().getUsername(), comment.getUser().getImageUrl(), comment.getText(), comment.getCreatedAt());
+        return new PostCommentDTO(comment.getId(), comment.getUser().getId(), comment.getUser().getUsername(), comment.getUser().getImageUrl(), comment.getText(), comment.getCreatedAt());
     }
 
     @Override
@@ -72,12 +73,20 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findByPostIdAndId(postId, id).orElseThrow(() -> new RuntimeException("Comment not found"));
         comment.setText(updatedComment.getText());
         commentRepository.save(comment);
-        return new PostCommentDTO(comment.getId(), comment.getUser().getUsername(), comment.getUser().getImageUrl(), comment.getText(), comment.getCreatedAt());
+        return new PostCommentDTO(comment.getId(), comment.getUser().getId(), comment.getUser().getUsername(), comment.getUser().getImageUrl(), comment.getText(), comment.getCreatedAt());
     }
 
     @Override
     public void deleteComment(Long postId, Long id) {
         Comment comment = commentRepository.findByPostIdAndId(postId, id).orElseThrow(() -> new RuntimeException("Comment not found"));
         commentRepository.delete(comment);
+    }
+
+    //TODO itt nem userId van hanem user email azt majd javítani!
+    @Override
+    public boolean isCommentOwner(Long commentId, String userId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+        return comment.getUser().getEmail().equals(userId);
     }
 }

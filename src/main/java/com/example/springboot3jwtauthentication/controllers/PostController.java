@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -173,11 +175,11 @@ public class PostController {
 
     PostCommentDTO response = new PostCommentDTO(
             createdComment.getId(),
+            createdComment.getUser().getId(),
             createdComment.getUser().getUserSortName(),
             createdComment.getUser().getImageUrl(),
             createdComment.getText(),
             createdComment.getCreatedAt()
-
     );
 
     return ResponseEntity.ok(response);
@@ -210,11 +212,17 @@ public class PostController {
     }
   }
 
-  // 5. Komment törlése ID alapján
   @DeleteMapping("/{postId}/comments/{id}")
-  public ResponseEntity<?> deleteCommentById(@PathVariable Long postId, @PathVariable Long id) {
+  public ResponseEntity<?> deleteCommentById(@PathVariable Long postId, @PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
     log.info("Deleting comment with ID {} for Post ID {}", id, postId);
     try {
+      String currentUserId = userDetails.getUsername();
+
+      if (!commentService.isCommentOwner(id, currentUserId)) {
+        log.warn("User {} is not authorized to delete comment ID {}", currentUserId, id);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only delete your own comments.");
+      }
+
       commentService.deleteComment(postId, id);
       log.info("Successfully deleted comment ID {} for Post ID {}", id, postId);
       return ResponseEntity.noContent().build();
@@ -223,6 +231,7 @@ public class PostController {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unable to delete comment");
     }
   }
+
 
   @GetMapping("/anon")
   public String anonEndPoint() {

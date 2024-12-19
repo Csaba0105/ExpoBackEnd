@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PostCommentDTO {
     private Long id;
+    private Long userId; // Felhasználó id
     private String userSortName;   // Felhasználó neve
     private String userImage;  // Felhasználói profilkép URL-je
     private String text;       // Komment szövege
