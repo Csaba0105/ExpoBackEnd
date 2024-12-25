@@ -1,5 +1,7 @@
 package com.example.springboot3jwtauthentication.controllers;
 
+import com.example.springboot3jwtauthentication.dto.EmailDTO;
+import com.example.springboot3jwtauthentication.services.EmailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,10 +23,22 @@ import lombok.RequiredArgsConstructor;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
+    private final EmailService emailService;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignUpRequest request) {
-        return authenticationService.signup(request);
+        ResponseEntity<?> response = authenticationService.signup(request);
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            EmailDTO emailDTO = new EmailDTO();
+            emailDTO.setTo(request.getEmail());
+            emailDTO.setSubject("Welcome to Our Service!");
+            emailDTO.setBody("Thank you for signing up, " + request.getFirstName() + " " + request.getLastName() + "!");
+
+            emailService.sendEmail(emailDTO);
+        }
+
+        return response;
     }
 
     @PostMapping("/signin")
