@@ -12,6 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import static com.example.springboot3jwtauthentication.utils.constants.ResponseMessageConstants.POST_NOT_FOUND_ERROR_MESSAGE;
+
 @RequiredArgsConstructor
 @Service
 public class PostServiceImpl implements PostService {
@@ -27,7 +29,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public Post getPostById(Long id) {
         return postRepository.findById(id)
-                .orElseThrow(() -> new PostNotFoundException("Post not found with id: " + id));
+                .orElseThrow(() -> new PostNotFoundException(POST_NOT_FOUND_ERROR_MESSAGE + " id: " + id));
     }
 
     @Override

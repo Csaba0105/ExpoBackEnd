@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static com.example.springboot3jwtauthentication.utils.constants.ResponseMessageConstants.POST_NOT_FOUND_ERROR_MESSAGE;
+import static com.example.springboot3jwtauthentication.utils.constants.ResponseMessageConstants.USER_NOT_FOUND_ERROR_MESSAGE;
+
 @Service
 public class PostLikeService {
 
@@ -36,9 +39,9 @@ public class PostLikeService {
             return "Like removed";
         } else {
             Post post = postRepository.findById(postId)
-                    .orElseThrow(() -> new RuntimeException("Post not found"));
+                    .orElseThrow(() -> new RuntimeException(POST_NOT_FOUND_ERROR_MESSAGE));
             User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new RuntimeException(USER_NOT_FOUND_ERROR_MESSAGE));
 
             PostLike like = new PostLike();
             like.setPost(post);

@@ -16,8 +16,10 @@ import com.example.springboot3jwtauthentication.models.User;
 import com.example.springboot3jwtauthentication.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.server.ResponseStatusException;
+
+import static com.example.springboot3jwtauthentication.utils.constants.ResponseMessageConstants.EMAIL_ALREADY_EXISTS_ERROR_MESSAGE;
+import static com.example.springboot3jwtauthentication.utils.constants.ResponseMessageConstants.INVALID_CREDENTIALS_ERROR_MESSAGE;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +48,7 @@ public class AuthenticationService {
             return ResponseEntity.ok(JwtAuthenticationResponse.builder().token(jwt).build());
         } catch (DataIntegrityViolationException ex) {
             if (ex.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email already exists");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(EMAIL_ALREADY_EXISTS_ERROR_MESSAGE);
             }
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
         } catch (Exception ex) {
@@ -61,7 +63,7 @@ public class AuthenticationService {
       authenticationManager.authenticate(
               new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
       var user = userRepository.findByEmail(request.getEmail())
-              .orElseThrow(() -> new IllegalArgumentException("Invalid email or password."));
+              .orElseThrow(() -> new IllegalArgumentException(INVALID_CREDENTIALS_ERROR_MESSAGE));
       var jwt = jwtService.generateToken(user);
       return JwtAuthenticationResponse.builder().token(jwt).build();
   }
