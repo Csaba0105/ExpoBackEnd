@@ -17,6 +17,8 @@ import com.example.springboot3jwtauthentication.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import static com.example.springboot3jwtauthentication.utils.constants.ResponseMessageConstants.USER_NOT_FOUND_ERROR_MESSAGE;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -31,7 +33,7 @@ public class UserService {
           @Override
           public UserDetails loadUserByUsername(String username) {
               return userRepository.findByEmail(username)
-                      .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                      .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_ERROR_MESSAGE));
           }
       };
   }
@@ -42,7 +44,7 @@ public class UserService {
         if (user.isPresent()) {
             return new UserDTO(user.get().getId(), user.get().getUserSortName(), user.get().getFirstName(), user.get().getLastName(), user.get().getEmail(), user.get().getImageUrl());
         } else {
-            throw new RuntimeException("User not found");
+            throw new RuntimeException(USER_NOT_FOUND_ERROR_MESSAGE);
         }
     }
 
