@@ -7,18 +7,17 @@ import com.example.springboot3jwtauthentication.dto.UserDTO;
 import com.example.springboot3jwtauthentication.models.Comment;
 import com.example.springboot3jwtauthentication.models.Image;
 import com.example.springboot3jwtauthentication.models.Post;
-import com.example.springboot3jwtauthentication.services.CommentService;
-import com.example.springboot3jwtauthentication.services.PostLikeService;
-import com.example.springboot3jwtauthentication.services.PostService;
-import com.example.springboot3jwtauthentication.services.UserService;
+import com.example.springboot3jwtauthentication.services.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -83,8 +82,8 @@ public class PostController {
     return null;
   }
 
-  @PostMapping
-  public ResponseEntity<Post> addPost(@RequestBody PostDTO postDTO) {
+  @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+  public ResponseEntity<Post> addPost(@RequestBody PostDTO postDTO, @RequestPart("image") MultipartFile image) {
     log.info("Attempting to add a new post with title: {}", postDTO.getTitle());
 
     try {
@@ -92,7 +91,7 @@ public class PostController {
       post.setTitle(postDTO.getTitle());
       post.setContent(postDTO.getContent());
 
-      Post savedPost = postService.savePost(post);
+      Post savedPost = postService.savePost(post, image);
       log.info("Successfully created a new post with ID: {} and title: {}", savedPost.getId(), savedPost.getTitle());
 
       return ResponseEntity.status(HttpStatus.CREATED).body(savedPost);
