@@ -9,4 +9,5 @@ public interface PostService {
     List<Post> getAllPosts();
     Post getPostById(Long id);
     Post savePost(Post post, MultipartFile image);
+    List<Post> getPostsByUserId(Long userId);
 }

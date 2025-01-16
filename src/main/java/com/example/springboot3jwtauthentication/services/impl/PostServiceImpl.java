@@ -52,4 +52,9 @@ public class PostServiceImpl implements PostService {
             throw new RuntimeException("An error occurred while saving the post: " + e.getMessage(), e);
         }
     }
+
+    @Override
+    public List<Post> getPostsByUserId(Long userId) {
+        return postRepository.findByUserId(userId);
+    }
 }
