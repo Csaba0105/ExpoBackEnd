@@ -8,6 +8,6 @@ import java.util.List;
 public interface PostService {
     List<Post> getAllPosts();
     Post getPostById(Long id);
-    Post savePost(Post post, MultipartFile image);
+    Post savePost(Post post);
     List<Post> getPostsByUserId(Long userId);
 }

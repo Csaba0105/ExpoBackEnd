@@ -33,20 +33,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post savePost(Post post, MultipartFile image) {
+    public Post savePost(Post post) {
         try {
-            // Upload the file and get its URL
-            String fileUrl = storageService.uploadFile(post.getUser().getUserSortName(), image);
-
-            // Create a new Image object and associate it with the post
-            Image postImage = new Image();
-            postImage.setUrl(fileUrl);
-            postImage.setPost(post);
-
-            // Add the image to the post's images list
-            post.getImages().add(postImage);
-
-            // Save the post to the database
             return postRepository.save(post);
         } catch (Exception e) {
             throw new RuntimeException("An error occurred while saving the post: " + e.getMessage(), e);

@@ -7,6 +7,7 @@ import com.example.springboot3jwtauthentication.dto.UserDTO;
 import com.example.springboot3jwtauthentication.models.Comment;
 import com.example.springboot3jwtauthentication.models.Image;
 import com.example.springboot3jwtauthentication.models.Post;
+import com.example.springboot3jwtauthentication.models.User;
 import com.example.springboot3jwtauthentication.services.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.example.springboot3jwtauthentication.models.Role.ROLE_ADMIN;
+import static com.example.springboot3jwtauthentication.models.Role.ROLE_USER;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -82,17 +86,29 @@ public class PostController {
     return null;
   }
 
-  @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-  public ResponseEntity<Post> addPost(@RequestBody PostDTO postDTO, @RequestPart("image") MultipartFile image) {
+  @PostMapping()
+  public ResponseEntity<Post> addPost(@RequestHeader("Authorization") String authToken, @RequestBody PostDTO postDTO) {
     log.info("Attempting to add a new post with title: {}", postDTO.getTitle());
 
     try {
+      UserDTO userDTO = userService.getUserProfile(authToken);
+      User user = new User();
+      user.setId(userDTO.getId());
+      user.setUserSortName(userDTO.getUserSortName());
+      user.setEmail(userDTO.getEmail());
+      user.setFirstName(userDTO.getFirstName());
+      user.setRole(ROLE_ADMIN); //TODO hiba
+
       Post post = new Post();
       post.setTitle(postDTO.getTitle());
       post.setContent(postDTO.getContent());
+      post.setUser(user);
 
-      Post savedPost = postService.savePost(post, image);
+      Post savedPost = postService.savePost(post);
       log.info("Successfully created a new post with ID: {} and title: {}", savedPost.getId(), savedPost.getTitle());
+      System.out.println(savedPost);
+
+      System.out.println(ResponseEntity.status(HttpStatus.CREATED).body(savedPost));
 
       return ResponseEntity.status(HttpStatus.CREATED).body(savedPost);
     } catch (Exception e) {
