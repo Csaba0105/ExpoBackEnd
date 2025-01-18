@@ -16,6 +16,8 @@ import com.example.springboot3jwtauthentication.services.AuthenticationService;
 
 import lombok.RequiredArgsConstructor;
 
+import javax.validation.Valid;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/v1")
@@ -42,7 +44,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signin")
-    public JwtAuthenticationResponse signin(@RequestBody SignInRequest request) {
+    public JwtAuthenticationResponse signin(@Valid @RequestBody SignInRequest request) {
         log.info("User signin : {}", request.getEmail());
         return authenticationService.signin(request);
     }
