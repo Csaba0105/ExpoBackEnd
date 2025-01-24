@@ -1,5 +1,6 @@
 package com.example.springboot3jwtauthentication.services;
 
+import com.example.springboot3jwtauthentication.error.InvalidCredentialsException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,11 +62,18 @@ public class AuthenticationService {
 
 
     public JwtAuthenticationResponse signin(SignInRequest request) {
-      authenticationManager.authenticate(
-              new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-      var user = userRepository.findByEmail(request.getEmail())
-              .orElseThrow(() -> new IllegalArgumentException(INVALID_CREDENTIALS_ERROR_MESSAGE));
-      var jwt = jwtService.generateToken(user);
-      return JwtAuthenticationResponse.builder().token(jwt).build();
-  }
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+            );
+        } catch (Exception ex) {
+            throw new InvalidCredentialsException(INVALID_CREDENTIALS_ERROR_MESSAGE);
+        }
+
+        var user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new InvalidCredentialsException(INVALID_CREDENTIALS_ERROR_MESSAGE));
+
+        var jwt = jwtService.generateToken(user);
+        return JwtAuthenticationResponse.builder().token(jwt).build();
+    }
 }
