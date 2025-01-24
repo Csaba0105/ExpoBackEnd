@@ -35,6 +35,7 @@ public class AuthenticationService {
     public ResponseEntity<?> signup(SignUpRequest request) {
         try {
             var user = User.builder()
+                    .userSortName(request.getUsername())
                     .firstName(request.getFirstName())
                     .lastName(request.getLastName())
                     .email(request.getEmail())
