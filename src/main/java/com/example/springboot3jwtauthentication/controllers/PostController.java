@@ -117,6 +117,19 @@ public class PostController {
     }
   }
 
+  @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletePost(@PathVariable Long id) {
+        log.info("Attempting to delete post with ID: {}", id);
+        try {
+        postService.deletePost(id);
+        log.info("Successfully deleted post with ID: {}", id);
+        return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+        log.error("Error occurred while deleting post with ID {}: {}", id, e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 
   // Like hozzáadása vagy eltávolítása
   @PostMapping("/{postId}/like")

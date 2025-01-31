@@ -10,4 +10,5 @@ public interface PostService {
     Post getPostById(Long id);
     Post savePost(Post post);
     List<Post> getPostsByUserId(Long userId);
+    void deletePost(Long id);
 }

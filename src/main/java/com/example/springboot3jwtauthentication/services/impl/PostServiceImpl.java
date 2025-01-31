@@ -45,4 +45,10 @@ public class PostServiceImpl implements PostService {
     public List<Post> getPostsByUserId(Long userId) {
         return postRepository.findByUserId(userId);
     }
+
+    @Override
+    public void deletePost(Long id) {
+        Post post = getPostById(id);
+        postRepository.delete(post);
+    }
 }
