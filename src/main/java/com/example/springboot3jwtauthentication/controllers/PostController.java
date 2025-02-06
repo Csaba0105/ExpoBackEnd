@@ -4,6 +4,7 @@ import com.example.springboot3jwtauthentication.dto.AddPostCommentDTO;
 import com.example.springboot3jwtauthentication.dto.PostCommentDTO;
 import com.example.springboot3jwtauthentication.dto.PostDTO;
 import com.example.springboot3jwtauthentication.dto.UserDTO;
+import com.example.springboot3jwtauthentication.mapper.UserMapper;
 import com.example.springboot3jwtauthentication.models.Comment;
 import com.example.springboot3jwtauthentication.models.Image;
 import com.example.springboot3jwtauthentication.models.Post;
@@ -58,14 +59,7 @@ public class PostController {
                       post.getImages().stream()
                               .map(Image::getUrl)
                               .toList(),
-                      new UserDTO(
-                              post.getUser().getId(),
-                              post.getUser().getUserSortName(),
-                              post.getUser().getFirstName(),
-                              post.getUser().getLastName(),
-                              post.getUser().getEmail(),
-                              post.getUser().getImageUrl()
-                      ),
+                      UserMapper.toDTO(post.getUser()),
                       postLikeService.isPostLikedByUser(post.getId(), user.getId())
               ))
               .collect(Collectors.toList());

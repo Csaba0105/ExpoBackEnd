@@ -18,4 +18,7 @@ public class UserDTO implements Serializable {
     private String lastName;
     private String email;
     private String imageUrl;
+    private String language;
+    private String theme;
+    private boolean notificationsEnabled;
 }

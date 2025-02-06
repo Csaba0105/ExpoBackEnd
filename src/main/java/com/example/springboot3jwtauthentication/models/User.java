@@ -48,6 +48,9 @@ public class User implements UserDetails {
 
   String imageUrl;
 
+  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private UserSettings settings;
+
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
       return List.of(new SimpleGrantedAuthority(role.name()));

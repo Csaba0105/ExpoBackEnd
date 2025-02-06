@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import com.example.springboot3jwtauthentication.dto.UserDTO;
+import com.example.springboot3jwtauthentication.mapper.UserMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,12 +41,10 @@ public class UserService {
 
     public UserDTO getUserProfile(String token) {
         String userEmail = extractUserIdFromToken(token);
-        Optional<User> user = userRepository.findByEmail(userEmail);
-        if (user.isPresent()) {
-            return new UserDTO(user.get().getId(), user.get().getUserSortName(), user.get().getFirstName(), user.get().getLastName(), user.get().getEmail(), user.get().getImageUrl());
-        } else {
-            throw new RuntimeException(USER_NOT_FOUND_ERROR_MESSAGE);
-        }
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException(USER_NOT_FOUND_ERROR_MESSAGE));
+
+        return UserMapper.toDTO(user);
     }
 
   public User save(User newUser) {
