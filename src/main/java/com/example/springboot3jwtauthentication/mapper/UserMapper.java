@@ -13,6 +13,7 @@ public class UserMapper {
                     .lastName(user.getLastName())
                     .email(user.getEmail())
                     .imageUrl(user.getImageUrl())
+                    .backgroundUrl(user.getBackgroundUrl())
                     .language(user.getSettings() != null ? user.getSettings().getLanguage() : "en")
                     .theme(user.getSettings() != null ? user.getSettings().getTheme() : "light")
                     .notificationsEnabled(user.getSettings() != null && user.getSettings().isNotificationsEnabled())

@@ -81,7 +81,7 @@ public class PostController {
   }
 
   @PostMapping()
-  public ResponseEntity<Post> addPost(@RequestHeader("Authorization") String authToken, @RequestBody PostDTO postDTO) {
+  public ResponseEntity<PostDTO> addPost(@RequestHeader("Authorization") String authToken, @RequestBody PostDTO postDTO) {
     log.info("Attempting to add a new post with title: {}", postDTO.getTitle());
 
     try {
@@ -96,15 +96,26 @@ public class PostController {
       Post post = new Post();
       post.setTitle(postDTO.getTitle());
       post.setContent(postDTO.getContent());
+      post.setImages(postDTO.getImageUrls().stream().map(url -> {
+        Image image = new Image();
+        image.setUrl(url);
+        image.setPost(post);
+        return image;
+      }).toList());
       post.setUser(user);
 
       Post savedPost = postService.savePost(post);
-      log.info("Successfully created a new post with ID: {} and title: {}", savedPost.getId(), savedPost.getTitle());
-      System.out.println(savedPost);
 
-      System.out.println(ResponseEntity.status(HttpStatus.CREATED).body(savedPost));
+      // 🔥 4. DTO konvertálás válaszhoz
+      PostDTO responseDTO = PostDTO.builder()
+              .id(savedPost.getId())
+              .title(savedPost.getTitle())
+              .content(savedPost.getContent())
+              .user(userDTO)
+              .imageUrls(savedPost.getImages().stream().map(Image::getUrl).toList())
+              .build();
 
-      return ResponseEntity.status(HttpStatus.CREATED).body(savedPost);
+      return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     } catch (Exception e) {
       log.error("Error occurred while adding a new post with title: {}: {}", postDTO.getTitle(), e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

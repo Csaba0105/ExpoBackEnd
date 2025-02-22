@@ -46,7 +46,11 @@ public class User implements UserDetails {
 
   LocalDateTime updatedAt;
 
+  @Column(length = 1000)
   String imageUrl;
+
+  @Column(length = 1000)
+  String backgroundUrl;
 
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private UserSettings settings;

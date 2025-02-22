@@ -1,5 +1,6 @@
 package com.example.springboot3jwtauthentication.dto;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class UserDTO implements Serializable {
     private String lastName;
     private String email;
     private String imageUrl;
+    private String backgroundUrl;
     private String language;
     private String theme;
     private boolean notificationsEnabled;

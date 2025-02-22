@@ -8,6 +8,7 @@ import com.example.springboot3jwtauthentication.mapper.UserMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -69,4 +70,22 @@ public class UserService {
     }
 
 
+    public ResponseEntity<UserDTO> getUserById(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        return user.map(value -> ResponseEntity.ok(UserMapper.toDTO(value))).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    public UserDTO updateUserProfile(String token, UserDTO updatedUser) {
+        System.out.println(updatedUser);
+        String userEmail = extractUserIdFromToken(token);
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException(USER_NOT_FOUND_ERROR_MESSAGE));
+
+        user.setFirstName(updatedUser.getFirstName());
+        user.setLastName(updatedUser.getLastName());
+        user.setImageUrl(updatedUser.getImageUrl());
+        user.setBackgroundUrl(updatedUser.getBackgroundUrl());
+
+        return UserMapper.toDTO(userRepository.save(user));
+    }
 }

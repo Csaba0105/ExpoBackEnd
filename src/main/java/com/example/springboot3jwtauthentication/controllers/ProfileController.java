@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,16 +37,16 @@ public class ProfileController {
         }
     }
 
-//    @PutMapping("/profile")
-//    public ResponseEntity<UserDTO> updateUserProfile(@RequestHeader("Authorization") String token,
-//                                                     @Valid @RequestBody UserDTO updatedUser) {
-//        try {
-//            UserDTO user = userService.updateUserProfile(token, updatedUser);
-//            return ResponseEntity.ok(user);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(500).body(null);
-//        }
-//    }
+    @PutMapping("/profile")
+    public ResponseEntity<UserDTO> updateUserProfile(@RequestHeader("Authorization") String token,
+                                                     @Valid @RequestBody UserDTO updatedUser) {
+        try {
+            UserDTO user = userService.updateUserProfile(token, updatedUser);
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
 
     @GetMapping("/profile/{userId}/posts")
     public List<PostDTO> getPostsByUser(@PathVariable Long userId) {

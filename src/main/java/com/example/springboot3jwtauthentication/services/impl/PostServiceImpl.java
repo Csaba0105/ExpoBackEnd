@@ -1,15 +1,11 @@
 package com.example.springboot3jwtauthentication.services.impl;
 
 import com.example.springboot3jwtauthentication.error.PostNotFoundException;
-import com.example.springboot3jwtauthentication.models.Image;
 import com.example.springboot3jwtauthentication.models.Post;
 import com.example.springboot3jwtauthentication.repositories.PostRepository;
 import com.example.springboot3jwtauthentication.services.PostService;
-import com.example.springboot3jwtauthentication.services.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 
 import static com.example.springboot3jwtauthentication.utils.constants.ResponseMessageConstants.POST_NOT_FOUND_ERROR_MESSAGE;
@@ -19,11 +15,10 @@ import static com.example.springboot3jwtauthentication.utils.constants.ResponseM
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
-    private final StorageService storageService;
 
     @Override
     public List<Post> getAllPosts() {
-        return postRepository.findAll();
+        return postRepository.findAllPostsOrderedByDate();
     }
 
     @Override
