@@ -3,6 +3,7 @@ package com.example.springboot3jwtauthentication.services;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 import io.minio.http.Method;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,10 +22,7 @@ public class MinioService {
                         @Value("${minio.access-key}") String accessKey,
                         @Value("${minio.secret-key}") String secretKey,
                         @Value("${minio.bucket}") String bucketName) {
-        this.minioClient = MinioClient.builder()
-                .endpoint(minioUrl)
-                .credentials(accessKey, secretKey)
-                .build();
+        this.minioClient = MinioClient.builder().endpoint(minioUrl).credentials(accessKey, secretKey).build();
         this.bucketName = bucketName;
     }
 
@@ -47,6 +45,11 @@ public class MinioService {
                         .bucket(bucketName)
                         .object(fileName)
                         .build()
+        );
+    }
+
+    public void deleteFile(String fileName) throws Exception {
+        minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucketName).object(fileName).build()
         );
     }
 }

@@ -2,7 +2,6 @@ package com.example.springboot3jwtauthentication.controllers;
 
 import com.example.springboot3jwtauthentication.dto.EmailDTO;
 import com.example.springboot3jwtauthentication.services.EmailService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 
 import javax.validation.Valid;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -45,7 +43,6 @@ public class AuthenticationController {
 
     @PostMapping("/signin")
     public JwtAuthenticationResponse signin(@Valid @RequestBody SignInRequest request) {
-        log.info("User signin : {}", request.getEmail());
         return authenticationService.signin(request);
     }
 }

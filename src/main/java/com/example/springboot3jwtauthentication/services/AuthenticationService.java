@@ -13,7 +13,7 @@ import com.example.springboot3jwtauthentication.dto.JwtAuthenticationResponse;
 import com.example.springboot3jwtauthentication.dto.SignInRequest;
 import com.example.springboot3jwtauthentication.dto.SignUpRequest;
 import com.example.springboot3jwtauthentication.models.Role;
-import com.example.springboot3jwtauthentication.models.User;
+import com.example.springboot3jwtauthentication.models.user.User;
 import com.example.springboot3jwtauthentication.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;

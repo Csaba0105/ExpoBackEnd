@@ -5,7 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.example.springboot3jwtauthentication.models.Role;
-import com.example.springboot3jwtauthentication.models.User;
+import com.example.springboot3jwtauthentication.models.user.User;
 import com.example.springboot3jwtauthentication.repositories.UserRepository;
 import com.example.springboot3jwtauthentication.services.UserService;
 

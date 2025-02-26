@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.example.springboot3jwtauthentication.dto.UserDTO;
 import com.example.springboot3jwtauthentication.mapper.UserMapper;
+import com.example.springboot3jwtauthentication.models.user.UserBackgroundImage;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.example.springboot3jwtauthentication.models.User;
+import com.example.springboot3jwtauthentication.models.user.User;
 import com.example.springboot3jwtauthentication.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -28,17 +29,17 @@ public class UserService {
     @Value("${token.secret.key}")
     private String jwtSecret;
 
-  private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
-  public UserDetailsService userDetailsService() {
-      return new UserDetailsService() {
-          @Override
-          public UserDetails loadUserByUsername(String username) {
-              return userRepository.findByEmail(username)
-                      .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_ERROR_MESSAGE));
-          }
-      };
-  }
+    public UserDetailsService userDetailsService() {
+        return new UserDetailsService() {
+            @Override
+            public UserDetails loadUserByUsername(String username) {
+                return userRepository.findByEmail(username)
+                        .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_ERROR_MESSAGE));
+            }
+        };
+    }
 
     public UserDTO getUserProfile(String token) {
         String userEmail = extractUserIdFromToken(token);
@@ -48,14 +49,14 @@ public class UserService {
         return UserMapper.toDTO(user);
     }
 
-  public User save(User newUser) {
-    if (newUser.getId() == null) {
-      newUser.setCreatedAt(LocalDateTime.now());
-    }
+    public User save(User newUser) {
+        if (newUser.getId() == null) {
+            newUser.setCreatedAt(LocalDateTime.now());
+        }
 
-    newUser.setUpdatedAt(LocalDateTime.now());
-    return userRepository.save(newUser);
-  }
+        newUser.setUpdatedAt(LocalDateTime.now());
+        return userRepository.save(newUser);
+    }
 
     private String extractUserIdFromToken(String token) {
         if (token.startsWith("Bearer ")) {
@@ -76,16 +77,24 @@ public class UserService {
     }
 
     public UserDTO updateUserProfile(String token, UserDTO updatedUser) {
-        System.out.println(updatedUser);
         String userEmail = extractUserIdFromToken(token);
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException(USER_NOT_FOUND_ERROR_MESSAGE));
 
+        // Ha a felhasználónak már van háttérképe, akkor frissítjük
+        UserBackgroundImage backgroundImage = user.getBackgroundUrl();
+        if (backgroundImage == null) {
+            backgroundImage = new UserBackgroundImage();
+            backgroundImage.setUser(user); // Ne felejtsd el beállítani a kapcsolatot!
+        }
+        backgroundImage.setUrl(updatedUser.getBackgroundUrl()); // Frissítjük az URL-t
+
         user.setFirstName(updatedUser.getFirstName());
         user.setLastName(updatedUser.getLastName());
         user.setImageUrl(updatedUser.getImageUrl());
-        user.setBackgroundUrl(updatedUser.getBackgroundUrl());
+        user.setBackgroundUrl(backgroundImage);
 
         return UserMapper.toDTO(userRepository.save(user));
     }
 }
+

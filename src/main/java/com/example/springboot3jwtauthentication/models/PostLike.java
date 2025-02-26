@@ -1,5 +1,6 @@
 package com.example.springboot3jwtauthentication.models;
 
+import com.example.springboot3jwtauthentication.models.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 

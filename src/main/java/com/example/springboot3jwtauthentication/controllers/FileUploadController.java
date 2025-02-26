@@ -24,4 +24,17 @@ public class FileUploadController {
             return ResponseEntity.status(500).body("File upload failed: " + e.getMessage());
         }
     }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteFile(@RequestParam("fileName") String fileName, @RequestHeader("Authorization") String authToken) {
+        try {
+            //UserDTO user = userService.getUserProfile(authToken);
+            //log.info("User profile retrieved successfully: {}", user.getId());
+            //TODO Implement user authorization logic
+            minioService.deleteFile(fileName);
+            return ResponseEntity.ok("File deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("File deletion failed: " + e.getMessage());
+        }
+    }
 }

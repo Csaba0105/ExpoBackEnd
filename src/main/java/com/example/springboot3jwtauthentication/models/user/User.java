@@ -1,9 +1,10 @@
-package com.example.springboot3jwtauthentication.models;
+package com.example.springboot3jwtauthentication.models.user;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
+import com.example.springboot3jwtauthentication.models.Role;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -49,8 +50,8 @@ public class User implements UserDetails {
   @Column(length = 1000)
   String imageUrl;
 
-  @Column(length = 1000)
-  String backgroundUrl;
+  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private UserBackgroundImage backgroundUrl;
 
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private UserSettings settings;

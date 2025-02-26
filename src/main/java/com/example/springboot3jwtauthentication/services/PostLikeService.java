@@ -2,7 +2,7 @@ package com.example.springboot3jwtauthentication.services;
 
 import com.example.springboot3jwtauthentication.models.Post;
 import com.example.springboot3jwtauthentication.models.PostLike;
-import com.example.springboot3jwtauthentication.models.User;
+import com.example.springboot3jwtauthentication.models.user.User;
 import com.example.springboot3jwtauthentication.repositories.PostLikeRepository;
 import com.example.springboot3jwtauthentication.repositories.PostRepository;
 import com.example.springboot3jwtauthentication.repositories.UserRepository;

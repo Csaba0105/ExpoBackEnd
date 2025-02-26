@@ -2,8 +2,8 @@ package com.example.springboot3jwtauthentication.services.impl;
 
 import com.example.springboot3jwtauthentication.dto.UserDTO;
 import com.example.springboot3jwtauthentication.mapper.UserMapper;
-import com.example.springboot3jwtauthentication.models.User;
-import com.example.springboot3jwtauthentication.models.UserSettings;
+import com.example.springboot3jwtauthentication.models.user.User;
+import com.example.springboot3jwtauthentication.models.user.UserSettings;
 import com.example.springboot3jwtauthentication.repositories.UserRepository;
 import com.example.springboot3jwtauthentication.repositories.UserSettingsRepository;
 import com.example.springboot3jwtauthentication.services.UserSettingsService;

@@ -8,20 +8,19 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
 
     @Override
-    public EmailDTO sendEmail(EmailDTO emailDTO) {
+    public void sendEmail(EmailDTO emailDTO) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(emailDTO.getTo());
         message.setSubject(emailDTO.getSubject());
         message.setText(emailDTO.getBody());
         mailSender.send(message);
-        return emailDTO;
     }
 }
