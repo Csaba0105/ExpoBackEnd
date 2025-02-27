@@ -1,6 +1,7 @@
 package com.example.springboot3jwtauthentication.controllers;
 
 import com.example.springboot3jwtauthentication.dto.*;
+import com.example.springboot3jwtauthentication.dto.post.PostLikeResponseDto;
 import com.example.springboot3jwtauthentication.models.Comment;
 import com.example.springboot3jwtauthentication.models.Image;
 import com.example.springboot3jwtauthentication.models.Post;
@@ -93,11 +94,16 @@ public class PostController {
 
   // Like hozzáadása vagy eltávolítása
   @PostMapping("/{postId}/like")
-  public ResponseEntity<Boolean> likePost(@PathVariable Long postId, @AuthenticationPrincipal User user) {
+  public ResponseEntity<PostLikeResponseDto> likePost(@PathVariable Long postId, @AuthenticationPrincipal User user) {
     boolean liked = postService.toggleLike(postId, user);
     int likes = postService.getPostById(postId).getLikes().size();
-    messagingTemplate.convertAndSend("/topic/like/" + postId, likes);
-    return ResponseEntity.ok(liked);
+    PostLikeResponseDto  postLikeResponseDto = PostLikeResponseDto.builder()
+            .postId(postId)
+            .userId(user.getId())
+            .isLiked(liked)
+            .likeCount(likes)
+            .build();
+    return ResponseEntity.ok(postLikeResponseDto);
   }
 
 
