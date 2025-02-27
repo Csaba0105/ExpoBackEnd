@@ -1,10 +1,6 @@
 package com.example.springboot3jwtauthentication.controllers;
 
-import com.example.springboot3jwtauthentication.dto.AddPostCommentDTO;
-import com.example.springboot3jwtauthentication.dto.PostCommentDTO;
-import com.example.springboot3jwtauthentication.dto.PostDTO;
-import com.example.springboot3jwtauthentication.dto.UserDTO;
-import com.example.springboot3jwtauthentication.mapper.UserMapper;
+import com.example.springboot3jwtauthentication.dto.*;
 import com.example.springboot3jwtauthentication.models.Comment;
 import com.example.springboot3jwtauthentication.models.Image;
 import com.example.springboot3jwtauthentication.models.Post;
@@ -13,6 +9,7 @@ import com.example.springboot3jwtauthentication.services.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.example.springboot3jwtauthentication.models.Role.ROLE_ADMIN;
 
@@ -32,34 +28,13 @@ public class PostController {
 
   private final PostService postService;
   private final UserService userService;
-  private final PostLikeService postLikeService;
   private final CommentService commentService;
+  private final SimpMessagingTemplate messagingTemplate;
 
   @GetMapping
-  public List<PostDTO> getAllPosts(@RequestHeader("Authorization") String authToken) {
-    try {
+  public ResponseEntity<List<PostDTO>> getAllPosts(@RequestHeader("Authorization") String authToken) {
       UserDTO user = userService.getUserProfile(authToken);
-      List<Post> posts = postService.getAllPosts();
-
-      List<PostDTO> postDTOs = posts.stream()
-              .map(post -> new PostDTO(
-                      post.getId(),
-                      post.getTitle(),
-                      post.getContent(),
-                      post.getImages().stream()
-                              .map(Image::getUrl)
-                              .toList(),
-                      postLikeService.getLikeCount(post.getId()).intValue(),
-                      UserMapper.toDTO(post.getUser()),
-                      postLikeService.isPostLikedByUser(post.getId(), user.getId())
-              ))
-              .collect(Collectors.toList());
-
-      return postDTOs;
-
-    } catch (Exception e) {
-      throw e; // Vagy kezelheted megfelelő válasz státusszal
-    }
+      return ResponseEntity.ok(postService.getAllPosts(user.getId()));
   }
 
   @GetMapping("/{id}")
@@ -81,7 +56,6 @@ public class PostController {
 
       Post post = new Post();
       post.setTitle(postDTO.getTitle());
-      post.setContent(postDTO.getContent());
       post.setImages(postDTO.getImageUrls().stream().map(url -> {
         Image image = new Image();
         image.setUrl(url);
@@ -96,7 +70,6 @@ public class PostController {
       PostDTO responseDTO = PostDTO.builder()
               .id(savedPost.getId())
               .title(savedPost.getTitle())
-              .content(savedPost.getContent())
               .user(userDTO)
               .imageUrls(savedPost.getImages().stream().map(Image::getUrl).toList())
               .build();
@@ -120,28 +93,11 @@ public class PostController {
 
   // Like hozzáadása vagy eltávolítása
   @PostMapping("/{postId}/like")
-  public ResponseEntity<?> toggleLike(@PathVariable Long postId, @RequestParam Long userId) {
-    try {
-      String message = postLikeService.toggleLike(postId, userId);
-      return ResponseEntity.ok().body(message);
-    } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
-    }
-  }
-
-  @GetMapping("/{postId}/likes/status")
-  public ResponseEntity<Map<String, Object>> getLikeStatus(@PathVariable Long postId, @RequestParam Long userId) {
-    try {
-      boolean liked = postLikeService.hasUserLiked(postId, userId);
-      Long likeCount = postLikeService.getLikeCount(postId);
-      Map<String, Object> response = new HashMap<>();
-      response.put("liked", liked);
-      response.put("likeCount", likeCount);
-
-      return ResponseEntity.ok(response);
-    } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-    }
+  public ResponseEntity<Boolean> likePost(@PathVariable Long postId, @AuthenticationPrincipal User user) {
+    boolean liked = postService.toggleLike(postId, user);
+    int likes = postService.getPostById(postId).getLikes().size();
+    messagingTemplate.convertAndSend("/topic/like/" + postId, likes);
+    return ResponseEntity.ok(liked);
   }
 
 

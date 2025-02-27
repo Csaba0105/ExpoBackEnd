@@ -2,10 +2,7 @@ package com.example.springboot3jwtauthentication.controllers;
 
 import com.example.springboot3jwtauthentication.dto.PostDTO;
 import com.example.springboot3jwtauthentication.dto.UserDTO;
-import com.example.springboot3jwtauthentication.mapper.UserMapper;
-import com.example.springboot3jwtauthentication.models.Image;
 import com.example.springboot3jwtauthentication.models.Post;
-import com.example.springboot3jwtauthentication.services.PostLikeService;
 import com.example.springboot3jwtauthentication.services.PostService;
 import com.example.springboot3jwtauthentication.services.UserService;
 import com.example.springboot3jwtauthentication.services.UserSettingsService;
@@ -15,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -25,7 +21,6 @@ public class ProfileController {
     private final UserService userService;
     private final UserSettingsService userSettingsService;
     private final PostService postService;
-    private final PostLikeService postLikeService;
 
     @GetMapping("/profile")
     public ResponseEntity<UserDTO> getUserProfile(@RequestHeader("Authorization") String token) {
@@ -51,19 +46,19 @@ public class ProfileController {
     @GetMapping("/profile/{userId}/posts")
     public List<PostDTO> getPostsByUser(@PathVariable Long userId) {
         List<Post> posts = postService.getPostsByUserId(userId);
-        return posts.stream()
-                .map(post -> new PostDTO(
-                        post.getId(),
-                        post.getTitle(),
-                        post.getContent(),
-                        post.getImages().stream()
-                                .map(Image::getUrl)
-                                .toList(),
-                        post.getLikes().size(),
-                        UserMapper.toDTO(post.getUser()),
-                        postLikeService.isPostLikedByUser(post.getId(), userId)
-                ))
-                .collect(Collectors.toList());
+        return null;
+//        return posts.stream()
+//                .map(post -> new PostDTO(
+//                        post.getId(),
+//                        post.getTitle(),
+//                        post.getImages().stream()
+//                                .map(Image::getUrl)
+//                                .toList(),
+//                        post.getLikes().size(),
+//                        UserMapper.toDTO(post.getUser()),
+//                        postLikeService.isPostLikedByCurrentUser(post.getId(), userId)
+//                ))
+//                .collect(Collectors.toList());
     }
 
     @PutMapping("/profile/{userId}/settings")

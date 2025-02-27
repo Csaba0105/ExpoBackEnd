@@ -8,15 +8,14 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostDTO {
     private Long id;
     private String title;
-    private String content;
     private List<String> imageUrls;
-    private Integer likesCount;
+    private Integer likes;
     private UserDTO user;
     private boolean likedByCurrentUser;
 }
