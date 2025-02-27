@@ -49,6 +49,7 @@ public class PostController {
                       post.getImages().stream()
                               .map(Image::getUrl)
                               .toList(),
+                      postLikeService.getLikeCount(post.getId()).intValue(),
                       UserMapper.toDTO(post.getUser()),
                       postLikeService.isPostLikedByUser(post.getId(), user.getId())
               ))

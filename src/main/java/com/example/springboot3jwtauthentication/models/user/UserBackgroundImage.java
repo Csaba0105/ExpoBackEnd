@@ -1,5 +1,6 @@
 package com.example.springboot3jwtauthentication.models.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@ToString
+@ToString(exclude = "user")
 @Table(name = "user_background_images")
 public class UserBackgroundImage {
     @Id
@@ -17,6 +18,7 @@ public class UserBackgroundImage {
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
     @Column(length = 1000)

@@ -59,6 +59,7 @@ public class ProfileController {
                         post.getImages().stream()
                                 .map(Image::getUrl)
                                 .toList(),
+                        post.getLikes().size(),
                         UserMapper.toDTO(post.getUser()),
                         postLikeService.isPostLikedByUser(post.getId(), userId)
                 ))

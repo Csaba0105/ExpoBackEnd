@@ -21,7 +21,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@ToString
+@ToString(exclude = "backgroundUrl")
 @Table(name = "users")
 public class User implements UserDetails {
 

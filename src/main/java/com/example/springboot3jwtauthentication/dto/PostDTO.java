@@ -16,6 +16,7 @@ public class PostDTO {
     private String title;
     private String content;
     private List<String> imageUrls;
+    private Integer likesCount;
     private UserDTO user;
     private boolean likedByCurrentUser;
 }
