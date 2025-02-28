@@ -2,6 +2,7 @@ package com.example.springboot3jwtauthentication.controllers;
 
 import com.example.springboot3jwtauthentication.dto.*;
 import com.example.springboot3jwtauthentication.dto.post.PostLikeResponseDto;
+import com.example.springboot3jwtauthentication.mapper.PostMapper;
 import com.example.springboot3jwtauthentication.models.Comment;
 import com.example.springboot3jwtauthentication.models.Image;
 import com.example.springboot3jwtauthentication.models.Post;
@@ -28,33 +29,31 @@ import static com.example.springboot3jwtauthentication.models.Role.ROLE_ADMIN;
 public class PostController {
 
   private final PostService postService;
-  private final UserService userService;
   private final CommentService commentService;
-  private final SimpMessagingTemplate messagingTemplate;
 
   @GetMapping
-  public ResponseEntity<List<PostDTO>> getAllPosts(@RequestHeader("Authorization") String authToken) {
-      UserDTO user = userService.getUserProfile(authToken);
-      return ResponseEntity.ok(postService.getAllPosts(user.getId()));
+  public ResponseEntity<List<PostDTO>> getAllPosts(@AuthenticationPrincipal User user) {
+    try {
+      List<PostDTO> postDTO = postService.getAllPosts(user.getId());
+      return ResponseEntity.ok(postDTO);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    }
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<Post> getPostById(@PathVariable Long id) {
-    postService.getPostById(id);
-    return null;
+  public ResponseEntity<PostDTO> getPostById(@PathVariable Long id) {
+    try {
+      PostDTO postDTO = postService.getPostById(id);
+      return ResponseEntity.ok(postDTO);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    }
   }
 
   @PostMapping()
-  public ResponseEntity<PostDTO> addPost(@RequestHeader("Authorization") String authToken, @RequestBody PostDTO postDTO) {
+  public ResponseEntity<PostDTO> addPost(@AuthenticationPrincipal User user, @RequestBody PostDTO postDTO) {
     try {
-      UserDTO userDTO = userService.getUserProfile(authToken);
-      User user = new User();
-      user.setId(userDTO.getId());
-      user.setUserSortName(userDTO.getUserSortName());
-      user.setEmail(userDTO.getEmail());
-      user.setFirstName(userDTO.getFirstName());
-      user.setRole(ROLE_ADMIN); //TODO hiba
-
       Post post = new Post();
       post.setTitle(postDTO.getTitle());
       post.setImages(postDTO.getImageUrls().stream().map(url -> {
@@ -64,17 +63,9 @@ public class PostController {
         return image;
       }).toList());
       post.setUser(user);
-
       Post savedPost = postService.savePost(post);
 
-      // 🔥 4. DTO konvertálás válaszhoz
-      PostDTO responseDTO = PostDTO.builder()
-              .id(savedPost.getId())
-              .title(savedPost.getTitle())
-              .user(userDTO)
-              .imageUrls(savedPost.getImages().stream().map(Image::getUrl).toList())
-              .build();
-
+      PostDTO responseDTO = PostMapper.toDTO(savedPost, false);
       return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -82,21 +73,19 @@ public class PostController {
   }
 
   @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePost(@PathVariable Long id) {
-        try {
+  public ResponseEntity<?> deletePost(@PathVariable Long id) {
+    try {
         postService.deletePost(id);
         return ResponseEntity.noContent().build();
-        } catch (Exception e) {
+    } catch (Exception e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
     }
+  }
 
-
-  // Like hozzáadása vagy eltávolítása
   @PostMapping("/{postId}/like")
   public ResponseEntity<PostLikeResponseDto> likePost(@PathVariable Long postId, @AuthenticationPrincipal User user) {
     boolean liked = postService.toggleLike(postId, user);
-    int likes = postService.getPostById(postId).getLikes().size();
+    int likes = postService.getPostById(postId).getLikes();
     PostLikeResponseDto  postLikeResponseDto = PostLikeResponseDto.builder()
             .postId(postId)
             .userId(user.getId())
@@ -123,7 +112,6 @@ public class PostController {
       Long commentCount = commentService.getCommentCount(postId);
       Map<String, Object> response = new HashMap<>();
       response.put("commentCount", commentCount);
-
       return ResponseEntity.ok(response);
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
@@ -131,14 +119,9 @@ public class PostController {
 
   }
 
-  // 2. Új komment hozzáadása egy adott posthoz
   @PostMapping("/{postId}/comments")
-  public ResponseEntity<PostCommentDTO> addComment(
-          @PathVariable Long postId,
-          @RequestBody AddPostCommentDTO request) {
-
+  public ResponseEntity<PostCommentDTO> addComment(@PathVariable Long postId, @RequestBody AddPostCommentDTO request) {
     Comment createdComment = commentService.addComment(postId, request.getUserId(), request.getText());
-
     PostCommentDTO response = new PostCommentDTO(
             createdComment.getId(),
             createdComment.getUser().getId(),
@@ -147,7 +130,6 @@ public class PostController {
             createdComment.getText(),
             createdComment.getCreatedAt()
     );
-
     return ResponseEntity.ok(response);
   }
 

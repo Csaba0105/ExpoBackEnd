@@ -19,15 +19,15 @@ public class Comment {
     private Long id;
 
     @Column(nullable = false)
-    private String text; // A komment szövege
+    private String text;
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
-    private Post post; // Kapcsolat a Post entitással (több komment tartozhat egy poszthoz)
+    private Post post;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; // Kapcsolat a User entitással (ki írta a kommentet)
+    private User user;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

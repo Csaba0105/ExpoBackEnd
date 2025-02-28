@@ -13,7 +13,7 @@ public class PostMapper {
                 .imageUrls(post.getImages().stream()
                         .map(Image::getUrl)
                         .toList())
-                .likes(post.getLikes().size())  // Ez kevésbé hatékony, lehetne query-vel
+                .likes(post.getLikes().size())
                 .user(UserMapper.toDTO(post.getUser()))
                 .likedByCurrentUser(likedByCurrentUser)
                 .build();

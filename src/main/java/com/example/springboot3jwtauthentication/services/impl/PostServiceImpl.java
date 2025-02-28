@@ -25,12 +25,10 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
-    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     public List<PostDTO> getAllPosts(Long userId) {
-        List<Post> posts = postRepository.findAll();
-
+        List<Post> posts = postRepository.findAllPostsOrderedByDate();
         return posts.stream().map(post -> {
             boolean likedByUser = postLikeRepository.existsByPostIdAndUserId(post.getId(), userId);
             return PostMapper.toDTO(post, likedByUser);
@@ -38,9 +36,10 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post getPostById(Long id) {
-        return postRepository.findById(id)
+    public PostDTO getPostById(Long id) {
+        Post posts = postRepository.findById(id)
                 .orElseThrow(() -> new PostNotFoundException(POST_NOT_FOUND_ERROR_MESSAGE + " id: " + id));
+        return PostMapper.toDTO(posts, postLikeRepository.existsByPostIdAndUserId(id, posts.getUser().getId()));
     }
 
     @Override
@@ -53,14 +52,16 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Post> getPostsByUserId(Long userId) {
-        return postRepository.findByUserId(userId);
+    public List<PostDTO> getPostsByUserId(Long userId) {
+        List<Post> posts = postRepository.findByUserId(userId);
+        return posts.stream()
+                .map(post -> PostMapper.toDTO(post, postLikeRepository.existsByPostIdAndUserId(post.getId(), userId)))
+                .collect(Collectors.toList());
     }
 
     @Override
     public void deletePost(Long id) {
-        Post post = getPostById(id);
-        postRepository.delete(post);
+        postLikeRepository.deleteByPostId(id);
     }
 
     @Override
