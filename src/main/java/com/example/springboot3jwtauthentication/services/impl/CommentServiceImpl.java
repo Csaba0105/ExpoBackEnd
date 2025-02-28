@@ -82,11 +82,10 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.delete(comment);
     }
 
-    //TODO itt nem userId van hanem user email azt majd javítani!
     @Override
-    public boolean isCommentOwner(Long commentId, String userId) {
+    public boolean isCommentOwner(Long commentId, Long userId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
-        return comment.getUser().getEmail().equals(userId);
+        return comment.getUser().getId().equals(userId);
     }
 }

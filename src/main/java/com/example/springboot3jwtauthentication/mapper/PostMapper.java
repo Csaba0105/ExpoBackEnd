@@ -16,6 +16,7 @@ public class PostMapper {
                 .likes(post.getLikes().size())
                 .user(UserMapper.toDTO(post.getUser()))
                 .likedByCurrentUser(likedByCurrentUser)
+                .createdAt(post.getCreatedAt())
                 .build();
     }
 }

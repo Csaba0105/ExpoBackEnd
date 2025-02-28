@@ -11,7 +11,6 @@ import com.example.springboot3jwtauthentication.services.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,8 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.example.springboot3jwtauthentication.models.Role.ROLE_ADMIN;
 
 @RequiredArgsConstructor
 @RestController
@@ -146,6 +143,7 @@ public class PostController {
   }
 
   // 4. Komment szerkesztése ID alapján
+  //TODO ellenőrizni, hogy a komment tulajdonosa-e a felhasználó
   @PutMapping("/{postId}/comments/{id}")
   public ResponseEntity<PostCommentDTO> editCommentById(@PathVariable Long postId, @PathVariable Long id, @RequestBody PostCommentDTO updatedComment) {
     try {
@@ -157,11 +155,9 @@ public class PostController {
   }
 
   @DeleteMapping("/{postId}/comments/{id}")
-  public ResponseEntity<?> deleteCommentById(@PathVariable Long postId, @PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+  public ResponseEntity<?> deleteCommentById(@PathVariable Long postId, @PathVariable Long id, @AuthenticationPrincipal User user) {
     try {
-      String currentUserId = userDetails.getUsername();
-
-      if (!commentService.isCommentOwner(id, currentUserId)) {
+      if (!commentService.isCommentOwner(id, user.getId())) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only delete your own comments.");
       }
 

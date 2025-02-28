@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -18,4 +19,5 @@ public class PostDTO {
     private Integer likes;
     private UserDTO user;
     private boolean likedByCurrentUser;
+    private LocalDateTime createdAt;
 }

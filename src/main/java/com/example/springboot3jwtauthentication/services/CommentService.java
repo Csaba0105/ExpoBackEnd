@@ -12,5 +12,5 @@ public interface CommentService {
     PostCommentDTO editComment(Long postId, Long id, PostCommentDTO updatedComment);
     void deleteComment(Long postId, Long id);
     Long getCommentCount(Long postId);
-    boolean isCommentOwner(Long id, String currentUserId);
+    boolean isCommentOwner(Long id, Long currentUserId);
 }
