@@ -49,16 +49,11 @@ public class AuthenticationService {
 
             return ResponseEntity.ok(JwtAuthenticationResponse.builder().token(jwt).build());
         } catch (DataIntegrityViolationException ex) {
-            if (ex.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(EMAIL_ALREADY_EXISTS_ERROR_MESSAGE);
-            }
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(EMAIL_ALREADY_EXISTS_ERROR_MESSAGE);
         } catch (Exception ex) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + ex.getMessage());
         }
     }
-
-
 
 
     public JwtAuthenticationResponse signin(SignInRequest request) {
