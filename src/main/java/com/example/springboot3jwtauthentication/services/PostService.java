@@ -1,7 +1,7 @@
 package com.example.springboot3jwtauthentication.services;
 
 import com.example.springboot3jwtauthentication.dto.PostDTO;
-import com.example.springboot3jwtauthentication.models.Post;
+import com.example.springboot3jwtauthentication.models.post.Post;
 import com.example.springboot3jwtauthentication.models.user.User;
 
 import java.util.List;

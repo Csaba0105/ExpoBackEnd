@@ -1,5 +1,6 @@
-package com.example.springboot3jwtauthentication.models;
+package com.example.springboot3jwtauthentication.models.post;
 
+import com.example.springboot3jwtauthentication.models.Image;
 import com.example.springboot3jwtauthentication.models.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,6 +36,9 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<PostLike> likes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<Comment> comments = new ArrayList<>();
 
     @CreationTimestamp
     @Column(updatable = false)

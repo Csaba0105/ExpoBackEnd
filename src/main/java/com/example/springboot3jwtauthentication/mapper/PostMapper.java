@@ -2,7 +2,7 @@ package com.example.springboot3jwtauthentication.mapper;
 
 import com.example.springboot3jwtauthentication.dto.PostDTO;
 import com.example.springboot3jwtauthentication.models.Image;
-import com.example.springboot3jwtauthentication.models.Post;
+import com.example.springboot3jwtauthentication.models.post.Post;
 
 public class PostMapper {
 
@@ -14,6 +14,7 @@ public class PostMapper {
                         .map(Image::getUrl)
                         .toList())
                 .likes(post.getLikes().size())
+                .comments(post.getComments().size())
                 .user(UserMapper.toDTO(post.getUser()))
                 .likedByCurrentUser(likedByCurrentUser)
                 .createdAt(post.getCreatedAt())

@@ -1,4 +1,4 @@
-package com.example.springboot3jwtauthentication.models;
+package com.example.springboot3jwtauthentication.models.post;
 
 import com.example.springboot3jwtauthentication.models.user.User;
 import jakarta.persistence.*;

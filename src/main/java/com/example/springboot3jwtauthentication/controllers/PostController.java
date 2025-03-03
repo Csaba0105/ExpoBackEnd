@@ -3,9 +3,9 @@ package com.example.springboot3jwtauthentication.controllers;
 import com.example.springboot3jwtauthentication.dto.*;
 import com.example.springboot3jwtauthentication.dto.post.PostLikeResponseDto;
 import com.example.springboot3jwtauthentication.mapper.PostMapper;
-import com.example.springboot3jwtauthentication.models.Comment;
 import com.example.springboot3jwtauthentication.models.Image;
-import com.example.springboot3jwtauthentication.models.Post;
+import com.example.springboot3jwtauthentication.models.post.Comment;
+import com.example.springboot3jwtauthentication.models.post.Post;
 import com.example.springboot3jwtauthentication.models.user.User;
 import com.example.springboot3jwtauthentication.services.*;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -37,6 +36,16 @@ public class PostController {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
   }
+
+    @GetMapping("/userId/{userId}")
+    public ResponseEntity<List<PostDTO>> getAllPostsByUserId(@PathVariable Long userId) {
+        try {
+            List<PostDTO> postDTO = postService.getAllPosts(userId);
+            return ResponseEntity.ok(postDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
   @GetMapping("/{id}")
   public ResponseEntity<PostDTO> getPostById(@PathVariable Long id) {

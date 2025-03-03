@@ -1,8 +1,8 @@
 package com.example.springboot3jwtauthentication.services.impl;
 
 import com.example.springboot3jwtauthentication.dto.PostCommentDTO;
-import com.example.springboot3jwtauthentication.models.Comment;
-import com.example.springboot3jwtauthentication.models.Post;
+import com.example.springboot3jwtauthentication.models.post.Comment;
+import com.example.springboot3jwtauthentication.models.post.Post;
 import com.example.springboot3jwtauthentication.models.user.User;
 import com.example.springboot3jwtauthentication.repositories.CommentRepository;
 import com.example.springboot3jwtauthentication.repositories.PostRepository;

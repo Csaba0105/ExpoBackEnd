@@ -17,6 +17,7 @@ public class PostDTO {
     private String title;
     private List<String> imageUrls;
     private Integer likes;
+    private int comments;
     private UserDTO user;
     private boolean likedByCurrentUser;
     private LocalDateTime createdAt;

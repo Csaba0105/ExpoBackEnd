@@ -1,6 +1,6 @@
 package com.example.springboot3jwtauthentication.repositories;
 
-import com.example.springboot3jwtauthentication.models.Post;
+import com.example.springboot3jwtauthentication.models.post.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

@@ -3,14 +3,13 @@ package com.example.springboot3jwtauthentication.services.impl;
 import com.example.springboot3jwtauthentication.dto.PostDTO;
 import com.example.springboot3jwtauthentication.error.PostNotFoundException;
 import com.example.springboot3jwtauthentication.mapper.PostMapper;
-import com.example.springboot3jwtauthentication.models.Post;
-import com.example.springboot3jwtauthentication.models.PostLike;
+import com.example.springboot3jwtauthentication.models.post.Post;
+import com.example.springboot3jwtauthentication.models.post.PostLike;
 import com.example.springboot3jwtauthentication.models.user.User;
 import com.example.springboot3jwtauthentication.repositories.PostLikeRepository;
 import com.example.springboot3jwtauthentication.repositories.PostRepository;
 import com.example.springboot3jwtauthentication.services.PostService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
