@@ -20,13 +20,11 @@ public class UserController {
 
     @GetMapping("/users")
     public ResponseEntity<List<UserDTO>> getUsers() {
-        return null;
+        return userService.getAllUsers();
     }
 
     @GetMapping("/users/{userId}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long userId) {
         return  userService.getUserById(userId);
     }
-
-
 }

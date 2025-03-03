@@ -1,7 +1,9 @@
 package com.example.springboot3jwtauthentication.services;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.example.springboot3jwtauthentication.dto.UserDTO;
 import com.example.springboot3jwtauthentication.mapper.UserMapper;
@@ -96,5 +98,13 @@ public class UserService {
 
         return UserMapper.toDTO(userRepository.save(user));
     }
-}
 
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        List<UserDTO> userDTOs = users.stream()
+                .map(UserMapper::toDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(userDTOs);
+    }
+}
