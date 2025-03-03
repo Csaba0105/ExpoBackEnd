@@ -21,5 +21,4 @@ public class PostCommentDTO {
     private String userImage;
     private String text;
     private LocalDateTime createdAt;
-
 }

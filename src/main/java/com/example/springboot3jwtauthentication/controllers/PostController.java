@@ -15,9 +15,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @RestController
@@ -112,19 +111,6 @@ public class PostController {
     }
   }
 
-  @GetMapping("/{postId}/comments/count")
-  public ResponseEntity<Map<String, Object>> getCommentCount(@PathVariable Long postId) {
-    try {
-      Long commentCount = commentService.getCommentCount(postId);
-      Map<String, Object> response = new HashMap<>();
-      response.put("commentCount", commentCount);
-      return ResponseEntity.ok(response);
-    } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-    }
-
-  }
-
   @PostMapping("/{postId}/comments")
   public ResponseEntity<PostCommentDTO> addComment(@PathVariable Long postId, @RequestBody AddPostCommentDTO request) {
     Comment createdComment = commentService.addComment(postId, request.getUserId(), request.getText());
@@ -139,27 +125,31 @@ public class PostController {
     return ResponseEntity.ok(response);
   }
 
-
-  // 3. Komment lekérdezése ID alapján
   @GetMapping("/{postId}/comments/{id}")
   public ResponseEntity<PostCommentDTO> getCommentById(@PathVariable Long postId, @PathVariable Long id) {
     try {
-      PostCommentDTO comment = commentService.getCommentById(postId, id);
+      PostCommentDTO comment = commentService.getCommentById(id);
       return ResponseEntity.ok(comment);
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
   }
 
-  // 4. Komment szerkesztése ID alapján
-  //TODO ellenőrizni, hogy a komment tulajdonosa-e a felhasználó
   @PutMapping("/{postId}/comments/{id}")
-  public ResponseEntity<PostCommentDTO> editCommentById(@PathVariable Long postId, @PathVariable Long id, @RequestBody PostCommentDTO updatedComment) {
+  public ResponseEntity<PostCommentDTO> editCommentById(@PathVariable Long postId, @PathVariable Long id, @AuthenticationPrincipal User user, @RequestBody PostCommentDTO updatedComment) {
     try {
+      PostCommentDTO existingComment = commentService.getCommentById(id);
+
+      if (!existingComment.getUserId().equals(user.getId())) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+      }
+
       PostCommentDTO editedComment = commentService.editComment(postId, id, updatedComment);
       return ResponseEntity.ok(editedComment);
+    } catch (NoSuchElementException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
   }
 

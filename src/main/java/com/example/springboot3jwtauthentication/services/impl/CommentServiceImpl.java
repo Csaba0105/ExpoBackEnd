@@ -2,6 +2,7 @@ package com.example.springboot3jwtauthentication.services.impl;
 
 import com.example.springboot3jwtauthentication.dto.PostCommentDTO;
 import com.example.springboot3jwtauthentication.models.post.Comment;
+import com.example.springboot3jwtauthentication.models.post.CommentLike;
 import com.example.springboot3jwtauthentication.models.post.Post;
 import com.example.springboot3jwtauthentication.models.user.User;
 import com.example.springboot3jwtauthentication.repositories.CommentRepository;
@@ -10,6 +11,7 @@ import com.example.springboot3jwtauthentication.repositories.UserRepository;
 import com.example.springboot3jwtauthentication.services.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,6 +26,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public List<PostCommentDTO> getCommentsByPostId(Long postId) {
         return commentRepository.findByPostId(postId)
                 .stream()
@@ -35,11 +38,6 @@ public class CommentServiceImpl implements CommentService {
                         comment.getText(),
                         comment.getCreatedAt()))
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public Long getCommentCount(Long postId) {
-        return commentRepository.countByPostId(postId);
     }
 
     @Override
@@ -63,9 +61,9 @@ public class CommentServiceImpl implements CommentService {
 
 
     @Override
-    public PostCommentDTO getCommentById(Long postId, Long id) {
-        Comment comment = commentRepository.findByPostIdAndId(postId, id).orElseThrow(() -> new RuntimeException("Comment not found"));
-        return new PostCommentDTO(comment.getId(), comment.getUser().getId(), comment.getUser().getUsername(), comment.getUser().getImageUrl(), comment.getText(), comment.getCreatedAt());
+    public PostCommentDTO getCommentById(Long id) {
+        Comment comment = commentRepository.findById(id).orElseThrow(() -> new RuntimeException("Comment not found"));
+        return new PostCommentDTO(comment.getId(), comment.getUser().getId(), comment.getUser().getUsername(), comment.getUser().getImageUrl(), comment.getText(),comment.getCreatedAt());
     }
 
     @Override
@@ -88,4 +86,5 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
         return comment.getUser().getId().equals(userId);
     }
+
 }

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddPostCommentDTO {
-    private Long postId; // A hozzászólás posztjának azonosítója
-    private Long userId; // A felhasználó azonosítója
-    private String text; // A hozzászólás szövege
+    private Long postId;
+    private Long userId;
+    private String text;
 }
