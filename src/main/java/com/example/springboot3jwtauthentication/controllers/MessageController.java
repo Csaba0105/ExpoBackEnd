@@ -1,25 +1,40 @@
 package com.example.springboot3jwtauthentication.controllers;
 
-import lombok.RequiredArgsConstructor;
+import com.example.springboot3jwtauthentication.models.messages.Message;
+import com.example.springboot3jwtauthentication.repositories.MessageRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import java.time.LocalDateTime;
+import java.util.List;
 
-import javax.validation.Valid;
-import java.security.Principal;
+@RestController
+@AllArgsConstructor
+@RequestMapping("/api/v1/messages")
+public class MessageController {
 
-//@RestController
-//@RequiredArgsConstructor
-//@RequestMapping("/api/message")
-//public class MessageController {
-//
-//    private final SimpMessagingTemplate template;
-//
-//    //@MessageMapping("/message")
-//    //public void createPrivateChatMessages(@RequestBody @Valid MessageCreateBindingModel messageCreateBindingModel, Principal principal, SimpMessageHeaderAccessor headerAccessor) throws Exception {
-//
-//    }
-//}
+    private final MessageRepository messageRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+
+    @PostMapping("/send")
+    public void sendMessage(@RequestBody Message message) {
+        message.setTimestamp(LocalDateTime.now());
+        messageRepository.save(message);
+        messagingTemplate.convertAndSend("/topic/chat/" + message.getReceiver(), message);
+    }
+
+    @GetMapping("/{sender}/{receiver}")
+    public List<Message> getMessages(@PathVariable String sender, @PathVariable String receiver) {
+        return messageRepository.findBySenderAndReceiver(sender, receiver);
+    }
+
+    @MessageMapping("/chat")
+    @SendTo("/topic/messages")
+    public Message handleWebSocketMessage(Message message) {
+        message.setTimestamp(LocalDateTime.now());
+        messageRepository.save(message);
+        return message;
+    }
+}
